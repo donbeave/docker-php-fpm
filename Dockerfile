@@ -16,4 +16,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# forward logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/php5-fpm.log
+
 CMD ["php5-fpm", "--nodaemonize"]

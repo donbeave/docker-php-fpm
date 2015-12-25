@@ -1,4 +1,4 @@
-# PHP-FPM (Docker container)
+# PHP-FPM (Docker)
 
 [![Build Status](https://circleci.com/gh/donbeave/docker-php-fpm.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/donbeave/docker-php-fpm)
 [![Analytics](https://ga-beacon.appspot.com/UA-71075299-1/docker-php-fpm/main-page)](https://github.com/igrigorik/ga-beacon)

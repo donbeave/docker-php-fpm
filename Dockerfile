@@ -20,4 +20,5 @@ RUN set -x \
 # forward logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/php5-fpm.log
 
+EXPOSE 9000
 CMD ["php5-fpm", "--nodaemonize"]

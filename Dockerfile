@@ -22,7 +22,10 @@ ADD pool.d/ /etc/php5/fpm/pool.d
 ADD run.sh /run.sh
 
 RUN chmod a+x /run.sh
-RUN mkdir -p /etc/php5/cli; ln -s /etc/php5/fpm/php.ini /etc/php5/cli/php.ini
+RUN set -x \
+	&& rm -f /etc/php5/cli/php.ini \
+	&& mkdir -p /etc/php5/cli \
+	&& ln -s /etc/php5/fpm/php.ini /etc/php5/cli/php.ini
 
 # forward logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/php5-fpm.log

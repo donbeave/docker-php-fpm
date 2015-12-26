@@ -1,4 +1,4 @@
-FROM buildpack-deps:wheezy-curl
+FROM php:5.6.16-fpm
 
 MAINTAINER Alexey Zhokhov <alexey@zhokhov.com>
 
@@ -8,27 +8,39 @@ ENV LANG C.UTF-8
 # Set the env variable DEBIAN_FRONTEND to noninteractive
 ENV DEBIAN_FRONTEND noninteractive
 
+# Install other needed extensions
 RUN set -x \
-	&& apt-get update \
-	&& apt-get install -y php5 php5-fpm php5-gd php5-mysql php5-dev php5-cli php-pear php5-memcache make libcurl4-openssl-dev libsasl2-dev libpcre3-dev \
-	&& pecl install mongodb \
-	&& pecl install redis \
-	&& apt-get remove -y php5-dev libcurl4-openssl-dev libsasl2-dev libpcre3-dev make \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+    && apt-get update \
+    && apt-get install -y libfreetype6 libjpeg62-turbo libmcrypt4 libpng12-0 \
+       sendmail --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-ADD php-fpm.conf /etc/php5/fpm/php-fpm.conf
-ADD pool.d/ /etc/php5/fpm/pool.d
+RUN buildDeps="libfreetype6-dev libjpeg-dev libldap2-dev libmcrypt-dev \
+               libpng12-dev zlib1g-dev libcurl4-openssl-dev libsasl2-dev \
+               libpcre3-dev libjpeg62-turbo-dev libssl-dev pkg-config"; \
+    set -x \
+    && apt-get update \
+    && apt-get install -y $buildDeps --no-install-recommends \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ \
+                                   --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
+    && docker-php-ext-configure mysql --with-mysql=mysqlnd \
+    && docker-php-ext-configure mysqli --with-mysqli=mysqlnd \
+    && docker-php-ext-install gd mysql mysqli pdo_mysql iconv mbstring mcrypt zip \
+    && pecl install redis \
+    && echo "extension=redis.so" > /usr/local/etc/php/conf.d/redis.ini \
+    && pecl install mongodb \
+    && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini \
+    && rm -rf /tmp/mongodb.tar.gz /tmp/mongodb \
+    && apt-get purge -y ${buildDeps} \
+    && rm -rf /var/lib/apt/lists/*
+
+ADD php.ini /usr/local/etc/php/php.ini
 ADD run.sh /run.sh
 
 RUN chmod a+x /run.sh
-RUN set -x \
-	&& rm -f /etc/php5/cli/php.ini \
-	&& mkdir -p /etc/php5/cli \
-	&& ln -s /etc/php5/fpm/php.ini /etc/php5/cli/php.ini
 
-# forward logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/php5-fpm.log
+VOLUME ["/data"]
 
 EXPOSE 9000
 CMD ["/run.sh"]

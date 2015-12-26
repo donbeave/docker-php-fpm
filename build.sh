@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="latest"
+VERSION="5.6.16"
 
 set -e
 

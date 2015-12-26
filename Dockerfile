@@ -17,8 +17,15 @@ RUN set -x \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
+ADD php-fpm.conf /etc/php5/fpm/php-fpm.conf
+ADD pool.d/ /etc/php5/fpm/pool.d
+ADD run.sh /run.sh
+
+RUN chmod a+x /run.sh
+RUN mkdir -p /etc/php5/cli; ln -s /etc/php5/fpm/php.ini /etc/php5/cli/php.ini
+
 # forward logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/php5-fpm.log
 
 EXPOSE 9000
-CMD ["php5-fpm", "--nodaemonize"]
+CMD ["/run.sh"]
